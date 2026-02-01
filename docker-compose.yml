@@ -1,0 +1,22 @@
+services:
+  browser-agent:
+    build: .
+    image: browser-agent:local
+    container_name: browser-agent
+    user: "1000:1000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/data
+    shm_size: 1gb
+    environment:
+      - API_KEY=${API_KEY:-testkey}
+      - MAX_SESSIONS=${MAX_SESSIONS:-2}
+      - SESSION_TTL_SEC=${SESSION_TTL_SEC:-900}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

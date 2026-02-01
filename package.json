@@ -1,0 +1,37 @@
+{
+  "name": "agent-browser-service",
+  "version": "1.0.0",
+  "description": "交互式浏览器 Agent 服务 (Interactive Browser Agent Service)",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js"
+  },
+  "keywords": [
+    "browser",
+    "agent",
+    "mcp",
+    "playwright",
+    "docker"
+  ],
+  "author": "Antigravity",
+  "license": "MIT",
+  "dependencies": {
+    "@types/uuid": "^10.0.0",
+    "dotenv": "^16.4.5",
+    "fastify": "^4.26.2",
+    "playwright": "1.58.1",
+    "playwright-core": "1.58.1",
+    "uuid": "^13.0.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
