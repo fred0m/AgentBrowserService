@@ -29,6 +29,18 @@ interface MCPResponse {
 }
 
 export async function mcpRoutes(fastify: FastifyInstance) {
+    // 鉴权 Hook
+    fastify.addHook('preHandler', async (req, reply) => {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || authHeader !== `Bearer ${config.API_KEY}`) {
+            reply.status(401).send({
+                jsonrpc: '2.0',
+                error: { code: -32000, message: 'Unauthorized' }
+            });
+            throw new Error('Unauthorized');
+        }
+    });
+
     // MCP 端点：处理所有 MCP 请求
     fastify.post('/', async (req: FastifyRequest, reply: FastifyReply) => {
         const mcpReq = req.body as MCPRequest;
@@ -39,6 +51,22 @@ export async function mcpRoutes(fastify: FastifyInstance) {
             let result: any;
 
             switch (mcpReq.method) {
+                case 'initialize':
+                    result = {
+                        protocolVersion: '2024-11-05',
+                        capabilities: {
+                            tools: {}
+                        },
+                        serverInfo: {
+                            name: 'agent-browser-service',
+                            version: '1.0.0'
+                        }
+                    };
+                    break;
+
+                case 'notifications/initialized':
+                    return reply.status(204).send();
+
                 case 'tools/list':
                     result = { tools: MCP_TOOLS };
                     break;
@@ -96,7 +124,7 @@ async function handleToolCall(params: any): Promise<any> {
             return await toolPageOpen(args.session_id, args.url);
 
         case 'page_snapshot':
-            return await toolPageSnapshot(args.session_id, args.mode || 'compact');
+            return await toolPageSnapshot(args.session_id);
 
         case 'page_click':
             return await toolPageClick(args.session_id, args.ref);
@@ -142,7 +170,7 @@ async function toolPageOpen(sessionId: string, url: string) {
     return { ok: true, url: session.page.url(), title };
 }
 
-async function toolPageSnapshot(sessionId: string, mode: 'compact' | 'text_only' | 'actions_only') {
+async function toolPageSnapshot(sessionId: string) {
     const session = sessionManager.getSession(sessionId);
     if (!session) {
         throw { code: -32602, message: '会话不存在' };
