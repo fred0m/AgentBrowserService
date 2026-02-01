@@ -21,6 +21,14 @@
   - 结构化 JSON 日志
   - 严格限制资源 (1GB SHM, UID 1000)
 
+## 技术栈
+
+本项目站在巨人的肩膀上，主要依赖以下优秀的开源项目：
+
+- **[Playwright](https://playwright.dev/)**: 强大的自动化浏览器控制引擎。
+- **[Fastify](https://www.fastify.io/)**: 高性能、低开销的 Node.js Web 框架。
+- **[Zod](https://zod.dev/)**: 类型安全的架构验证工具。
+
 ## 快速开始
 
 ### 前置要求

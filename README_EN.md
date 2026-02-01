@@ -18,6 +18,14 @@ Provides both **HTTP API** (OpenAPI) and **MCP** (Model Context Protocol) for ea
   - Structured JSON logging.
   - Strict resource constraints (1GB SHM, UID 1000).
 
+## Tech Stack
+
+This project is built on top of several amazing open-source projects:
+
+- **[Playwright](https://playwright.dev/)**: Reliable end-to-end testing and automation for modern web apps.
+- **[Fastify](https://www.fastify.io/)**: Fast and low overhead web framework for Node.js.
+- **[Zod](https://zod.dev/)**: TypeScript-first schema declaration and validation library.
+
 ## Quick Start
 
 ### Prerequisites
