@@ -18,6 +18,17 @@ Provides both **HTTP API** (OpenAPI) and **MCP** (Model Context Protocol) for ea
   - Structured JSON logging.
   - Strict resource constraints (1GB SHM, UID 1000).
 
+## Branch Comparison
+
+This project maintains two main branches to suit different needs:
+
+| Branch | Description | Best For | Token Usage | Dependencies |
+| :--- | :--- | :--- | :--- | :--- |
+| **`main`** | Native Playwright implementation, stable and lightweight | General development, full browser control | Medium | `playwright` |
+| **`feature/agent-browser-integration`** | Integrated Vercel `agent-browser`, optimized for AI interactions | **AI Agent Production**, cost-sensitive | **Very Low** (-75%) | `agent-browser` |
+
+> **Key Difference**: The `feature/agent-browser-integration` branch introduces a separate CLI process and aggressive snapshot filtering (defaulting to `interactive` mode), significantly reducing Token usage but potentially omitting non-interactive page details.
+
 ## Tech Stack
 
 This project is built on top of several amazing open-source projects:

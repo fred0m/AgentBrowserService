@@ -21,6 +21,17 @@
   - 结构化 JSON 日志
   - 严格限制资源 (1GB SHM, UID 1000)
 
+## 分支说明
+
+本项目目前维护两个主要分支，您可以根据需求选择：
+
+| 分支 | 描述 | 适用场景 | Token 消耗 | 依赖 |
+| :--- | :--- | :--- | :--- | :--- |
+| **`main`** | 使用原生 Playwright 实现，稳定且依赖少 | 通用开发，需要完全控制浏览器行为 | 中等 | `playwright` |
+| **`feature/agent-browser-integration`** | 集成 Vercel `agent-browser` 库，深度优化 AI 交互 | **AI Agent 生产环境**，对 Token 成本敏感 | **极低** (-75%) | `agent-browser` |
+
+> **差异点**：`feature/agent-browser-integration` 分支引入了独立的 CLI 进程和更激进的快照清洗策略（默认为 `interactive` 模式，仅保留交互元素），在大幅降低 Token 的同时，可能会丢失部分非交互性的页面细节。
+
 ## 技术栈
 
 本项目站在巨人的肩膀上，主要依赖以下优秀的开源项目：
