@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { sessionManager } from '../services/SessionManager.js';
-import { SnapshotSerializer } from '../services/SnapshotSerializer.js';
+import { AgentBrowserAdapter } from '../services/AgentBrowserAdapter.js';
 import { config } from '../config.js';
 import { logger } from '../utils/logger.js';
 
@@ -78,7 +78,10 @@ export async function apiRoutes(fastify: FastifyInstance) {
 
         try {
             logger.info(`[API] 正在打开页面`, { url: body.data.url, session_id: session.id });
-            await session.page.goto(body.data.url, { waitUntil: 'domcontentloaded' });
+            await AgentBrowserAdapter.goto(session.id, session.profileDir, body.data.url);
+
+            // Wait a bit for page to load and get title
+            await session.page.waitForTimeout(500);
             const title = await session.page.title();
             return { ok: true, url: session.page.url(), title };
         } catch (error: any) {
@@ -108,8 +111,15 @@ export async function apiRoutes(fastify: FastifyInstance) {
         }
 
         try {
-            // 获取快照和 RefMap
-            const { snapshot, refMap } = await SnapshotSerializer.capture(session.page, session.id, body.data.mode);
+            // 根据配置模式获取快照
+            const mode = config.SNAPSHOT_FILTER_MODE;
+            const depth = config.SNAPSHOT_MAX_DEPTH;
+
+            const { snapshot, refMap } = await AgentBrowserAdapter.snapshot(
+                session.id,
+                session.profileDir,
+                { mode, depth }
+            );
 
             // 更新会话的 RefMap
             session.refMap = refMap;
@@ -148,11 +158,12 @@ export async function apiRoutes(fastify: FastifyInstance) {
     fastify.post('/page/click', async (req, reply) => {
         const body = InteractSchema.parse(req.body);
         try {
-            const { session, selector } = getSessionAndSelector(body.session_id, body.ref);
-            if (!body.ref) throw new Error('Ref is required for click'); // Should be validated by schema strictly if dedicated
+            const session = sessionManager.getSession(body.session_id);
+            if (!session) throw new Error('Session not found');
+            if (!body.ref) throw new Error('Ref is required for click');
 
-            logger.info(`[API] Click`, { ref: body.ref, selector, session_id: session.id });
-            await session.page.click(selector);
+            logger.info(`[API] Click`, { ref: body.ref, session_id: session.id });
+            await AgentBrowserAdapter.click(session.id, session.profileDir, body.ref);
             return { ok: true };
         } catch (error: any) {
             reply.status(error.message.includes('not found') ? 404 : 500);
@@ -164,11 +175,12 @@ export async function apiRoutes(fastify: FastifyInstance) {
     fastify.post('/page/fill', async (req, reply) => {
         const body = InteractSchema.parse(req.body);
         try {
-            const { session, selector } = getSessionAndSelector(body.session_id, body.ref);
+            const session = sessionManager.getSession(body.session_id);
+            if (!session) throw new Error('Session not found');
             if (!body.ref || body.text === undefined) throw new Error('Ref and text are required for fill');
 
-            logger.info(`[API] Fill`, { ref: body.ref, selector, text: body.text, session_id: session.id });
-            await session.page.fill(selector, body.text);
+            logger.info(`[API] Fill`, { ref: body.ref, text: body.text, session_id: session.id });
+            await AgentBrowserAdapter.fill(session.id, session.profileDir, body.ref, body.text);
             return { ok: true };
         } catch (error: any) {
             reply.status(error.message.includes('not found') ? 404 : 500);

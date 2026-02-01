@@ -1,7 +1,8 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { MCP_TOOLS } from './tools.js';
 import { sessionManager } from '../services/SessionManager.js';
-import { SnapshotSerializer } from '../services/SnapshotSerializer.js';
+import { AgentBrowserAdapter } from '../services/AgentBrowserAdapter.js';
+import { config } from '../config.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -135,7 +136,8 @@ async function toolPageOpen(sessionId: string, url: string) {
         throw { code: -32602, message: '会话不存在' };
     }
 
-    await session.page.goto(url, { waitUntil: 'domcontentloaded' });
+    await AgentBrowserAdapter.goto(session.id, session.profileDir, url);
+    await session.page.waitForTimeout(500);
     const title = await session.page.title();
     return { ok: true, url: session.page.url(), title };
 }
@@ -146,7 +148,14 @@ async function toolPageSnapshot(sessionId: string, mode: 'compact' | 'text_only'
         throw { code: -32602, message: '会话不存在' };
     }
 
-    const { snapshot, refMap } = await SnapshotSerializer.capture(session.page, session.id, mode);
+    const filterMode = config.SNAPSHOT_FILTER_MODE;
+    const depth = config.SNAPSHOT_MAX_DEPTH;
+
+    const { snapshot, refMap } = await AgentBrowserAdapter.snapshot(
+        session.id,
+        session.profileDir,
+        { mode: filterMode, depth }
+    );
     session.refMap = refMap;
     return snapshot;
 }
@@ -157,12 +166,7 @@ async function toolPageClick(sessionId: string, ref: string) {
         throw { code: -32602, message: '会话不存在' };
     }
 
-    const selector = session.refMap.get(ref);
-    if (!selector) {
-        throw { code: -32602, message: `Ref '${ref}' 未找到或已过期` };
-    }
-
-    await session.page.click(selector);
+    await AgentBrowserAdapter.click(session.id, session.profileDir, ref);
     return { ok: true };
 }
 
@@ -172,12 +176,7 @@ async function toolPageFill(sessionId: string, ref: string, text: string) {
         throw { code: -32602, message: '会话不存在' };
     }
 
-    const selector = session.refMap.get(ref);
-    if (!selector) {
-        throw { code: -32602, message: `Ref '${ref}' 未找到或已过期` };
-    }
-
-    await session.page.fill(selector, text);
+    await AgentBrowserAdapter.fill(session.id, session.profileDir, ref, text);
     return { ok: true };
 }
 

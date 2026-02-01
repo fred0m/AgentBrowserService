@@ -26,6 +26,7 @@
 本项目站在巨人的肩膀上，主要依赖以下优秀的开源项目：
 
 - **[Playwright](https://playwright.dev/)**: 强大的自动化浏览器控制引擎。
+- **[agent-browser](https://github.com/vercel-labs/agent-browser)**: Vercel 开发的 AI Agent 浏览器自动化 CLI，用于优化快照和减少 Token 使用。
 - **[Fastify](https://www.fastify.io/)**: 高性能、低开销的 Node.js Web 框架。
 - **[Zod](https://zod.dev/)**: 类型安全的架构验证工具。
 
@@ -71,6 +72,8 @@ docker compose down
 | `SESSION_TTL_SEC` | `900` | 会话无活动自动回收时间 (秒) |
 | `SNAPSHOT_TEXT_MAX_CHARS` | `1200` | 快照中文本内容最大长度 |
 | `SNAPSHOT_ACTIONS_MAX` | `60` | 快照中最大交互元素数量 |
+| `SNAPSHOT_FILTER_MODE` | `interactive` | 快照过滤模式 (interactive/compact/full) |
+| `SNAPSHOT_MAX_DEPTH` | `5` | 快照 DOM 树最大深度 |
 | `LOG_LEVEL` | `info` | 日志级别 (debug, info, warn, error) |
 
 ## 数据卷 (Volumes)
