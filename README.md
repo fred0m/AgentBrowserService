@@ -21,11 +21,23 @@
   - 结构化 JSON 日志
   - 严格限制资源 (1GB SHM, UID 1000)
 
+## 分支说明
+
+本项目目前维护两个主要分支，您可以根据需求选择：
+
+| 分支 | 描述 | 适用场景 | Token 消耗 | 依赖 |
+| :--- | :--- | :--- | :--- | :--- |
+| **`main`** | 使用原生 Playwright 实现，稳定且依赖少 | 通用开发，需要完全控制浏览器行为 | 中等 | `playwright` |
+| **`feature/agent-browser-integration`** | 集成 Vercel `agent-browser` 库，深度优化 AI 交互 | **AI Agent 生产环境**，对 Token 成本敏感 | **极低** (-75%) | `agent-browser` |
+
+> **差异点**：`feature/agent-browser-integration` 分支引入了独立的 CLI 进程和更激进的快照清洗策略（默认为 `interactive` 模式，仅保留交互元素），在大幅降低 Token 的同时，可能会丢失部分非交互性的页面细节。
+
 ## 技术栈
 
 本项目站在巨人的肩膀上，主要依赖以下优秀的开源项目：
 
 - **[Playwright](https://playwright.dev/)**: 强大的自动化浏览器控制引擎。
+- **[agent-browser](https://github.com/vercel-labs/agent-browser)**: Vercel 开发的 AI Agent 浏览器自动化 CLI，用于优化快照和减少 Token 使用。
 - **[Fastify](https://www.fastify.io/)**: 高性能、低开销的 Node.js Web 框架。
 - **[Zod](https://zod.dev/)**: 类型安全的架构验证工具。
 
@@ -71,6 +83,8 @@ docker compose down
 | `SESSION_TTL_SEC` | `900` | 会话无活动自动回收时间 (秒) |
 | `SNAPSHOT_TEXT_MAX_CHARS` | `1200` | 快照中文本内容最大长度 |
 | `SNAPSHOT_ACTIONS_MAX` | `60` | 快照中最大交互元素数量 |
+| `SNAPSHOT_FILTER_MODE` | `interactive` | 快照过滤模式 (interactive/compact/full) |
+| `SNAPSHOT_MAX_DEPTH` | `5` | 快照 DOM 树最大深度 |
 | `LOG_LEVEL` | `info` | 日志级别 (debug, info, warn, error) |
 
 ## 数据卷 (Volumes)
